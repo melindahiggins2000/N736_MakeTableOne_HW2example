@@ -14,20 +14,19 @@ by Melinda Higgins, PhD; [https://melindahiggins.netlify.app/](https://melindahi
 
 # Making Table "One" Using R and RMarkdown
 
-## This example from HW2 from NRSG 736 includes:
+## Slides
 
-* aaaa
-* aaaa
+* [Slides - Levels of Measurement](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/Levels_of_Measurement_clarified_MHiggins_May2020.pdf)
+* [Slides - Power and Effect Sizes](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/MHiggins_PowerLecture_11122024.pdf)
+* [Slides - P-values and Effect Sizes](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/MHiggins_pvalues_effectSizes.pdf)
 
+## HELP (Health Evaluation and Linkage to Primary Care) Dataset
 
+* [HELP Study Details and Dataset](https://nhorton.people.amherst.edu/sasr2/datasets.php)
+* [HELP Study Data Collection Forms ("codebook")](https://nhorton.people.amherst.edu/help/)
+* [SAS and R Book](https://nhorton.people.amherst.edu/sasr2/)
 
-## Add another levels here
+## Table "One" With R and RMarkdown
 
-more stuff
-
-# another l1
-
-## l2
-
-more details
-
+* [Table "One" - Rmarkdown](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/NRSG736_Homework02_Fall2025_AnswerKey_addES.Rmd)
+* [Table "One" - HTML](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/NRSG736_Homework02_Fall2025_AnswerKey_addES.html)

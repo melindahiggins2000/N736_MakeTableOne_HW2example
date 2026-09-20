@@ -3,9 +3,9 @@ title: "NRSG 736 Homework 2 - Answer Key"
 author: "Melinda Higgins"
 date: "10-04-2025"
 output:
-  html_document: default
-  word_document: default
   pdf_document: default
+  word_document: default
+  html_document: default
 editor_options: 
   chunk_output_type: console
 header-includes:
