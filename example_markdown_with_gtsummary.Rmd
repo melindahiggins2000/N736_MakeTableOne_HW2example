@@ -1,0 +1,143 @@
+---
+title: "Example Markdown Table 1 with gtsummary"
+output: html_document
+date: "`r Sys.Date()`"
+---
+
+```{r setup, include=FALSE}
+# this code just sets up the document - dont change anything here
+
+# setup options
+# hide code
+knitr::opts_chunk$set(echo = FALSE)
+# hide warnings
+knitr::opts_chunk$set(warning = FALSE)
+#hide messages
+knitr::opts_chunk$set(message = FALSE)
+# continue to knit even if errors
+# errors will be shown in output document
+knitr::opts_chunk$set(error = TRUE)
+```
+
+This Markdown will generate example "table 1"s . It can be modified to suit your data. More information can be found here: https://www.danieldsjoberg.com/gtsummary/ 
+
+```{r}
+# Call the packages you need
+library(tidyverse) # general data wrangling functions in this package
+library(data.table) # data table objects tend to work nicer with the gtsummary package for some reason
+library(Hmisc) # labeling functions from this package
+library(gtsummary) # makes pretty tables
+```
+
+```{r}
+#read in your dataset
+df <- read.csv("example_df.csv")
+df <- data.table(df) #makes df a "data table" object - works nicer with the gtsummary package
+```
+
+```{r}
+## Variable Set Up Example
+
+# Continuous Variables 
+# format is: label(data_set$variable_name) <- "label you'd like for variable_name"
+
+#age
+label(df$age)<- "Age"
+#height
+label(df$height) <- "Height (cm)"
+#weight
+label(df$weight) <- "Weight (kg)"
+
+#factor variables
+
+#gender
+df$gender <- factor(df$gender, levels = c("0", "1"))   # factor your existing varialbe
+levels(df$gender) <- c("Male", "Female")               # label the levels of your factor
+label(df$gender) <- "Gender"                           # label the variable
+
+#education
+df$education <- factor(df$education, levels = c("0", "1","2"))
+levels(df$education) <- c("Less than High School", "High School", "College or More")
+label(df$education) <- "Highest Education Level Attained"
+```
+
+## Table 1: Simple Summary Table
+
+Put any description of table 1 you'd like here. This table summarizes all data and does not include any stratification or statistical tests.
+
+```{r}
+# select variables to make a table 
+table_variaibles <- df %>%
+  dplyr::select(
+    age,
+    height,
+    weight,
+    gender,
+    education,
+  )
+
+# make the table
+table_variaibles %>% tbl_summary(statistic = list(
+                                    all_continuous() ~ "{mean} ({sd})",    # specify statistics for continuous variables
+                                    all_categorical() ~ "{n} ({p}%)"       # specify statistics for categorical variables
+                                  ),
+                                  digits = all_continuous() ~ 2,           # change number of decimal places for continuous variables 
+                                  missing_text = "(Missing)") %>%          # how do you want "missing" observarions to appear
+                    modify_header(label ~ "**Variable**") %>%              # change text for top of variables column here
+                    modify_caption("**Table 1: Descriptive Statistics**")  # change the table title here
+```
+
+## Table 2: Stratified Summary Table
+
+Summary table stratified by a variable (in this case gender). Statistical tests can be performed by specifying "test = list(...)". You can exclude the "test = list(...)" code to use the gtsummary default tests. "add_overall(last=TRUE)" adds a "total" column as the last column in the table. Setting it to =TRUE makes the "total" column appear first in the table. 
+
+```{r}
+# this code can be used to generate a table split by a variable like gender
+
+table_variaibles %>% tbl_summary(by = gender,                                # specify the variable you'd like to split the table by
+                                 statistic = list(
+                                    all_continuous() ~ "{mean} ({sd})",
+                                    all_categorical() ~ "{n} ({p}%)"
+                                  ),
+                                  digits = all_continuous() ~ 2,
+                                  missing_text = "(Missing)") %>%
+                    add_p(test = list(
+                                    all_continuous() ~ "t.test",             # specify test type for continuous variables
+                                    all_categorical() ~ "chisq.test"),       # specify test type for categorical variables
+                      pvalue_fun = ~ style_pvalue(.x, digits = 2)) %>%       # add p-values and specify decimal places
+                    add_overall(last = TRUE) %>%                             # add a "total" column to the table
+                    modify_header(label ~ "**Variable**") %>%
+                    modify_spanning_header(c("stat_1", "stat_2") ~ "**Gender**") %>%    # a header to span the "gender" columns
+                    modify_caption("**Table 2. Demograhpics by Gender**") %>%
+                    separate_p_footnotes() %>%                               # add footnotes for statistical tests
+                    bold_labels()                                            # make the labels bold
+```
+
+## Table 3: Linear Regression Model
+
+This data was randomly generated so model results are not what you'd expect necessarily. 
+
+```{r}
+mod1<-lm(weight~age+gender+height, data = df)                          # make a regression model
+
+tbl1<-tbl_regression(mod1, intercept = TRUE) %>%                       # specify the intercept should be included in the table
+                      modify_caption("**Regression model of Weight**") # table title
+tbl1                                                                   # print the table
+
+```
+
+## Table 4: Combine Multiple Linear Regression Models into one table
+
+This data was randomly generated so model results are not what you'd expect necessarily. 
+
+```{r}
+mod2<-lm(height~age+gender+weight, data = df)                           #make a second regression model
+
+tbl1<-tbl_regression(mod1, intercept = TRUE) %>%                        # Re-make 1st table so we can change the title
+                      modify_caption("**Regression Models**")           # change table title
+tbl2<-tbl_regression(mod2, intercept = TRUE)                            #make a second table
+
+tbl_merge(list(tbl1,tbl2),
+          tab_spanner = c("**Weight**", "**Height**"))
+
+```

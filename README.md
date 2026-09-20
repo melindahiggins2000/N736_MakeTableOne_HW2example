@@ -34,6 +34,14 @@ by Melinda Higgins, PhD; [https://melindahiggins.netlify.app/](https://melindahi
 * [My Materials from TIDAL Workshop](https://melindahiggins2000.github.io/emory_tidal_Rlectures/)
 * [Other Helpful Resources](https://melindahiggins2000.github.io/emory_tidal_Rlectures/additionalResources.html)
 
+## Small Dataset, R and RMarkdown to Get Started [re: Jordan Pelkmans, Fall 2025]
+
+* [Intro to R Slides - Jordan Pelkmans](https://melindahiggins2000.github.io/emory_tidal_Rlectures/Intro_to_R_Presentation.pdf)
+* [Small Data Example - spreadsheet data CSV](https://melindahiggins2000.github.io/emory_tidal_Rlectures/example_df.csv)
+* [R code to get started](https://melindahiggins2000.github.io/emory_tidal_Rlectures/Intro_to_r_example.R)
+* [Rmarkdown to get started - RMD](https://melindahiggins2000.github.io/emory_tidal_Rlectures/example_markdown_with_gtsummary.Rmd)
+* [Rmarkdown to get started - HTML](https://melindahiggins2000.github.io/emory_tidal_Rlectures/example_markdown_with_gtsummary.html)
+
 ## HELP (Health Evaluation and Linkage to Primary Care) Dataset
 
 * [HELP Dataset in *.Rdata format](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/helpwide.RData)
