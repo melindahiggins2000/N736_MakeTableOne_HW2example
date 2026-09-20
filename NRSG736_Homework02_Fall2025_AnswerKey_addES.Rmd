@@ -1,0 +1,491 @@
+---
+title: "NRSG 736 Homework 2 - Answer Key"
+author: "Melinda Higgins"
+date: "10-04-2025"
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+editor_options: 
+  chunk_output_type: console
+header-includes:
+- \usepackage{pdflscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+---
+
+```{r setup, include=FALSE}
+# set up knitting options
+# show code (echo = TRUE)
+# keep knitting even with errors (error = TRUE)
+# hide messages and warnings
+# (message = FALSE)
+# (warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE,
+                      error = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+
+# load packages needed for this document
+library(dplyr)
+library(car)
+library(arsenal)
+library(gtsummary)
+
+# read in data
+load("helpwide.RData")
+
+# rename dataset for code examples
+helpdat <- helpwide
+
+# remove extra copy of the data
+rm(helpwide)
+
+# select variables needed
+# select the main variables for this analysis
+h1 <- helpdat %>%
+  select(age, pss_fr, pcs, mcs, cesd,
+         a15a, a15b, d1, e2b, i1, i2,
+         female, racegrp, homeless, g1b)
+```
+
+## Get quick summary of the groups (suicide yes or no)
+
+Let's compare people who did or did not have thoughts of suicide in the last 30 days at their baseline visit (`g1b`).
+
+Get quick table of the counts and percents for suicidal thoughts yes vs no.
+
+```{r}
+# I used gtsummary here
+h1 %>%
+  select(g1b) %>%
+  mutate(g1b = haven::as_factor(g1b)) %>%
+  gtsummary::tbl_summary(
+    type = list(g1b ~ "categorical")
+  ) %>%
+  modify_caption("**Table Using `gtsummary`**")
+
+# alternative use table with knitr::kable
+table(helpdat$g1b,
+      useNA = "ifany") %>%
+  knitr::kable(
+    caption = "Alternative Table Using `table()` and `knitr`"
+  )
+```
+
+Notice that there are 326 who did NOT have thoughts of suicide and 127 who did (YES).
+
+\newpage
+
+## Considering distributions
+
+Before we summarize our data, we need to consider the distribution of the data - is it reasonably normally distributed? are there any obvious/major outliers?
+
+For this I'll provide the code here using `base R` and the `car` package. Let's look at histograms with overlaid density curves AND look at Q-Q normal probability plots.
+
+We can also formally run tests of the normal distribution assumption - the Shapiro-Wilks test.
+
+The code below shows examples for `age` (which is fairly normally distributed) and for `d1` which is a count variable and highly right-skewed.
+
+_I am not showing the distribution checks for all of the variables here._
+
+### Histograms with overlaid density curve
+
+```{r}
+hist(h1$age, probability = T,
+     main = "Ages in HELP Dataset")
+lines(density(h1$age), col=2)
+
+hist(h1$d1, probability = T,
+     main = "How many times hospitalized for medical problems (lifetime)")
+lines(density(h1$d1), col=2)
+```
+
+\newpage
+
+### Q-Q plot with `base R`
+
+```{r}
+# add QQ plot and reference line
+qqnorm(h1$age,
+       main = "Normality Plot for Age")
+qqline(h1$age)
+
+# add QQ plot and reference line
+qqnorm(h1$d1,
+       main = "Normality Plot for How many times hospitalized for medical problems (lifetime)")
+qqline(h1$d1)
+```
+
+\newpage
+
+### Q-Q plot with `car::qqPlot()` - with shaded confidence intervals
+
+Using `qqPlot()` from the `car` (companion for applied regression) package by John Fox [https://cran.r-project.org/web/packages/car/index.html](https://cran.r-project.org/web/packages/car/index.html), the potential outliers are highlighted by row number.
+
+```{r}
+# QQ Plot using car package
+car::qqPlot(h1$age,
+            main = "Normality Plot for Age")
+car::qqPlot(h1$d1,
+            main = "Normality Plot for How many times hospitalized for medical problems (lifetime)")
+```
+
+\newpage
+### Shapiro-Wilks Normality Test
+
+Both of these are statistically significant (see below), p < 0.05. However, the QQ Plot for `age` above is reasonably normally distributed whereas the one for `d1` which is a count variable for "How many times hospitalized for medical problems (lifetime)" is obviously skewed and non-normal.
+
+**Remember that the Shapiro-Wilks (and similar) tests are sensitive for larger sample sizes, so even if the p-value is < 0.05, look at the QQ plots (normal probability plots) to assess whether or not the data look reasonably normal.**
+
+Also check the means and medians and see if the values are similar and if the histogram is roughly symmetric - most statistical tests and models are reasonably robust to kurtosis issues (distribution is more pointy or flat when compared to the bell-shaped normal curve). The main issues to look for are skewness to the left or right (longer tails to the left or right).
+
+```{r}
+# shapiro-wilks normality test
+shapiro.test(h1$age)
+shapiro.test(h1$d1)
+```
+
+\newpage
+## Checking assumptions - equal variances for t-tests
+
+The codes _above_ for the Shapiro-Wilks tests show how to check the normality assumptions to help decide if we need to run parametric or non-parametric tests and associated descriptive statistics.
+
+However, when we run a t-test, we also need to check the assumption or equal variance. To do this we should:
+
+1. check the ratio of the 2 group standard deviations (ideally < than 2:1 ratio)
+2. and perform the test of equal variance - here I'm using the base R function `bartlett.test()`.
+
+Ratio of the 2 standard deviations - I'm using the `purrr::map()` function here. The code below is an example for the `age` variable and for the `g1b` suicide YES/NO group variable.
+
+```{r}
+library(purrr)
+sd2grp <- h1 %>%
+  split(.$g1b) %>%
+  purrr::map(~sd(.$age))
+
+# make data.frame
+sd2grp.df <- data.frame(sd2grp)
+
+# show this as a table
+knitr::kable(sd2grp.df,
+             col.names = c("SD for AGE for Suicide No",
+                           "SD for AGE for Suicide Yes"),
+             caption = "Standard Deviations for Age by Suicide YES/NO Group")
+
+ratiosd <- ifelse(
+  sd2grp.df[,1] > sd2grp.df[,2],
+  sd2grp.df[,1] / sd2grp.df[,2],
+  sd2grp.df[,2] / sd2grp.df[,1]
+)
+
+bt_age <- bartlett.test(age ~ g1b, data=h1)
+```
+
+For the `age` variable:
+
+* The standard deviations for the two suicide YES/NO groups were `r sd2grp.df[,1]` and `r sd2grp.df[,2]`, where the ratio was `r ratiosd` which is < less than 2.
+* The p-value for Bartlett's test of equal variance was `r bt_age$p.value`.
+
+**NOTE: I am not showing the checks for all of the approximately normally distributed variables (`age`, `pss_fr`, `pcs`, `mcs`, `cesd`). However, as long as you provide the justification, I will accept either the pooled or unpooled t-tests.**
+
+\newpage
+## Checking assumptions - small cell counts for Chi-square tests
+
+When using the full HELP dataset, the EXPECTED counts are ok. I like using the `gmodels` package which has the `CrossTable()` function which will provide a warning if the expected counts assumption is not met (when using the `format = "SPSS"` option).
+
+_The output below from the `gmodels` package shows the EXPECTED and ACTUAL counts - compare these!_
+
+
+```{r}
+# you can also see if there is a warning
+# using the gmodels package
+# with the SPSS format
+library(gmodels)
+gmodels::CrossTable(h1$racegrp, h1$g1b,
+                    expected=TRUE,
+                    prop.r=FALSE,
+                    prop.t=FALSE,
+                    prop.chisq=FALSE,
+                    chisq=TRUE,
+                    fisher=TRUE,
+                    format = "SPSS")
+```
+
+
+\newpage
+## Descriptive Stats Table - using `arsenal` package
+
+Learn more on how to make these tables with the `arsenal` pacakge - read the vignette on the [`tableby` function](https://cran.r-project.org/web/packages/arsenal/vignettes/tableby.html).
+
+Compare by `g1b` suicide YES/NO group.
+
+Notice that I have used `anova()` for the normally distributed variables, `kwt()` for the non-normal/skewed variables, and either the `chisq()` Chi-square test or `fe()` Fisher's exact test for the categorical variables.
+
+Notice the inclusion of footnotes below.
+
+```{r results = "asis"}
+# use the attr() function 
+# to use labels on the variables
+# age pss_fr pcs mcs cesd
+
+attr(h1$age,'label')  <-
+  attributes(h1)[["variable.labels"]][["age"]]
+attr(h1$pss_fr,'label')  <-
+  attributes(h1)[["variable.labels"]][["pss_fr"]]
+attr(h1$pcs,'label')  <-
+  attributes(h1)[["variable.labels"]][["pcs"]]
+attr(h1$mcs,'label')  <-
+  attributes(h1)[["variable.labels"]][["mcs"]]
+attr(h1$cesd,'label')  <-
+  attributes(h1)[["variable.labels"]][["cesd"]]
+
+# a15a a15b d1 e2b i1 i2
+
+attr(h1$a15a,'label')  <-
+  attributes(h1)[["variable.labels"]][["a15a"]]
+attr(h1$a15b,'label')  <-
+  attributes(h1)[["variable.labels"]][["a15b"]]
+attr(h1$d1,'label')  <-
+  attributes(h1)[["variable.labels"]][["d1"]]
+attr(h1$e2b,'label')  <-
+  attributes(h1)[["variable.labels"]][["e2b"]]
+attr(h1$i1,'label')  <-
+  attributes(h1)[["variable.labels"]][["i1"]]
+attr(h1$i2,'label')  <-
+  attributes(h1)[["variable.labels"]][["i2"]]
+
+# female racegrp homeless
+
+attr(h1$female,'label')  <-
+  attributes(h1)[["variable.labels"]][["female"]]
+attr(h1$racegrp,'label')  <-
+  attributes(h1)[["variable.labels"]][["racegrp"]]
+attr(h1$homeless,'label')  <-
+  attributes(h1)[["variable.labels"]][["homeless"]]
+
+# make sure results = "asis" for chunk option
+# custom statistics defined below
+
+tb1 <- tableby(
+  g1b ~ 
+    # parametric stats
+    anova(age, "Nmiss", "meansd") + 
+    anova(pss_fr, "Nmiss", "meansd") +
+    anova(pcs, "Nmiss", "meansd") +
+    anova(mcs, "Nmiss", "meansd") + 
+    anova(cesd, "Nmiss", "meansd") +
+    # non-parametric stats
+    kwt(a15a, "Nmiss", "medianq1q3") +
+    kwt(a15b, "Nmiss", "medianq1q3") +
+    kwt(d1, "Nmiss", "medianq1q3") + 
+    kwt(e2b, "Nmiss", "medianq1q3") +
+    kwt(i1, "Nmiss", "medianq1q3") +
+    kwt(i2, "Nmiss", "medianq1q3") +
+    kwt(a15a, "Nmiss", "medianq1q3") +
+    # categorical chi-square stats
+    chisq(female, "Nmiss", "countpct") +
+    chisq(racegrp, "Nmiss", "countpct") +
+    chisq(homeless, "Nmiss", "countpct"),
+  data = h1
+)
+
+# add footnotes for the different tests
+summary(tb1,
+        pfootnote = TRUE,
+        title = "Compare Subject Characteristics by Suicide Group")
+```
+
+\newpage
+\blandscape
+
+Example with `gtsummary` package
+
+```{r}
+# useful in Rmarkdown
+# also makes an HTML table
+# gtsummary package
+# gtsummary package already loaded above
+library(gtsummary)
+
+h1 %>%
+  tbl_summary(
+    by = g1b,
+    label = list(
+      age = attributes(h1)[["variable.labels"]][["age"]],
+      pss_fr = attributes(h1)[["variable.labels"]][["pss_fr"]],
+      pcs = attributes(h1)[["variable.labels"]][["pcs"]],
+      mcs = attributes(h1)[["variable.labels"]][["mcs"]],
+      cesd = attributes(h1)[["variable.labels"]][["cesd"]],
+      a15a = attributes(h1)[["variable.labels"]][["a15a"]],
+      a15b = attributes(h1)[["variable.labels"]][["a15b"]],
+      d1 = attributes(h1)[["variable.labels"]][["d1"]],
+      e2b = attributes(h1)[["variable.labels"]][["e2b"]],
+      i1 = attributes(h1)[["variable.labels"]][["i1"]],
+      i2 = attributes(h1)[["variable.labels"]][["i2"]],
+      female = attributes(h1)[["variable.labels"]][["female"]],
+      racegrp = attributes(h1)[["variable.labels"]][["racegrp"]],
+      homeless = attributes(h1)[["variable.labels"]][["homeless"]]
+    ),
+    type = list(
+      c(age, pss_fr, pcs, mcs, cesd) ~ "continuous",
+      c(a15a, a15b, d1, e2b, i1, i2) ~ "continuous2",
+      c(female, racegrp, homeless) ~ "categorical"
+    ),
+    digits = list(
+      all_continuous() ~ 2,
+      all_continuous2() ~ 2,
+      all_categorical() ~ 1
+    ),
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_continuous2() ~ "{median} [{p25}, {p75}]",
+      all_categorical() ~ "{n} ({p}%)"
+    )
+  ) %>%
+  add_p(pvalue_fun = label_style_pvalue(digits = 3),
+        test = list(all_continuous() ~ "t.test",
+                    all_continuous2() ~ "wilcox.test",
+                    all_categorical() ~ "chisq.test"))
+```
+
+\elandscape
+
+\newpage
+\blandscape
+
+Add effect sizes to table
+
+```{r}
+# create custom functions
+# to compute each effect size
+my_escd <- function(data, variable, by, ...) {
+  effectsize::cohens_d(data[[variable]] ~ as.factor(data[[by]]),
+                       pooled_sd = TRUE,
+                       paired = FALSE,
+                       data = data) |> 
+    as.data.frame() %>%
+    dplyr::mutate(
+      stat = glue::glue(
+        "d={style_sigfig(Cohens_d, digits = 3)}, 
+        [{style_sigfig(CI_low, digits = 3)}, {style_sigfig(CI_high, digits = 3)}]"
+        )
+    ) %>%
+    dplyr::pull(stat)
+}
+
+my_estau <- function(data, variable, by, ...) {
+  correlation::correlation(
+    data = data.frame(h1[[variable]], 
+                      as.numeric(h1[[by]])), 
+    method = "kendall") %>%
+    as.data.frame() %>%
+    dplyr::mutate(
+      stat = glue::glue(
+        "tau={style_sigfig(tau, digits = 3)},
+        [{style_sigfig(CI_low, digits = 3)}, {style_sigfig(CI_high, digits = 3)}]"
+      )
+    ) %>%
+    dplyr::pull(stat)
+}
+
+my_escw <- function(data, variable, by, ...) {
+  table(h1[[variable]], h1[[by]]) %>%
+  effectsize::cohens_w() %>%
+  as.data.frame() %>%
+    dplyr::mutate(
+      stat = glue::glue(
+        "w={style_sigfig(Cohens_w, digits = 3)},
+        [{style_sigfig(CI_low, digits = 3)}, {style_sigfig(CI_high, digits = 3)}]"
+      )
+    ) %>%
+    dplyr::pull(stat)
+}
+```
+
+
+```{r}
+h1 %>%
+  tbl_summary(
+    by = g1b,
+    label = list(
+      age = attributes(h1)[["variable.labels"]][["age"]],
+      pss_fr = attributes(h1)[["variable.labels"]][["pss_fr"]],
+      pcs = attributes(h1)[["variable.labels"]][["pcs"]],
+      mcs = attributes(h1)[["variable.labels"]][["mcs"]],
+      cesd = attributes(h1)[["variable.labels"]][["cesd"]],
+      a15a = attributes(h1)[["variable.labels"]][["a15a"]],
+      a15b = attributes(h1)[["variable.labels"]][["a15b"]],
+      d1 = attributes(h1)[["variable.labels"]][["d1"]],
+      e2b = attributes(h1)[["variable.labels"]][["e2b"]],
+      i1 = attributes(h1)[["variable.labels"]][["i1"]],
+      i2 = attributes(h1)[["variable.labels"]][["i2"]],
+      female = attributes(h1)[["variable.labels"]][["female"]],
+      racegrp = attributes(h1)[["variable.labels"]][["racegrp"]],
+      homeless = attributes(h1)[["variable.labels"]][["homeless"]]
+    ),
+    type = list(
+      c(age, pss_fr, pcs, mcs, cesd) ~ "continuous",
+      c(a15a, a15b, d1, e2b, i1, i2) ~ "continuous2",
+      c(female, racegrp, homeless) ~ "categorical"
+    ),
+    digits = list(
+      all_continuous() ~ 2,
+      all_continuous2() ~ 2,
+      all_categorical() ~ 1
+    ),
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      all_continuous2() ~ "{median} [{p25}, {p75}]",
+      all_categorical() ~ "{n} ({p}%)"
+    )
+  ) %>%
+  add_p(pvalue_fun = label_style_pvalue(digits = 3),
+        test = list(all_continuous() ~ "t.test",
+                    all_continuous2() ~ "wilcox.test",
+                    all_categorical() ~ "chisq.test")) %>%
+  add_stat(fns = list(all_continuous() ~ my_escd,
+                      all_continuous2() ~ my_estau,
+                      all_categorical() ~ my_escw)) |>
+  modify_header(add_stat_1 = "**Effect Size**")
+
+# h1 %>%
+#   tbl_summary(
+#     by = g1b,
+#     label = list(
+#       age = "Age in years",
+#       mcs = "Mental Component Score - SF36 QOL",
+#       a15a = "In the last 6m how many nights have you spentin an overnight shelter",
+#       d1 = "How many times hospitalized for medical problems (lifetime)",
+#       e2b = "Number of times in past 6 months entered a detox program",
+#       racegrp = "Race"),
+#     type = list(
+#       c(age, mcs) ~ "continuous",
+#       c(a15a, d1, e2b) ~ "continuous2",
+#       c(racegrp) ~ "categorical"
+#     ),
+#     digits = list(
+#       all_continuous() ~ 2,
+#       all_continuous2() ~ 2,
+#       all_categorical() ~ 1
+#     ),
+#     statistic = list(
+#       all_continuous() ~ "{mean} ({sd})",
+#       all_continuous2() ~ "{median} [{p25}, {p75}]",
+#       all_categorical() ~ "{n} ({p}%)"
+#     )
+#   ) %>%
+#   add_p(pvalue_fun = label_style_pvalue(digits = 3),
+#         test = list(all_continuous() ~ "t.test",
+#                     all_continuous2() ~ "wilcox.test",
+#                     all_categorical() ~ "chisq.test")) %>%
+#   add_stat(fns = list(all_continuous() ~ my_escd,
+#                       all_continuous2() ~ my_estau,
+#                       all_categorical() ~ my_escw)) |>
+#   modify_header(add_stat_1 = "**Effect Size**")
+
+```
+
+\elandscape
+
+
