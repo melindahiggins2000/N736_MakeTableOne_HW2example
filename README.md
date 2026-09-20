@@ -29,6 +29,11 @@ by Melinda Higgins, PhD; [https://melindahiggins.netlify.app/](https://melindahi
 * [P-values and Effect Sizes](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/MHiggins_pvalues_effectSizes.pdf)
 * [Correlation Foundations](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/MHiggins_CorrelationFoundation_08302020_fix.pdf)
 
+## Getting Started with R and RStudio and RMarkdown
+
+* [My Materials from TIDAL Workshop](https://melindahiggins2000.github.io/emory_tidal_Rlectures/)
+* [Other Helpful Resources](https://melindahiggins2000.github.io/emory_tidal_Rlectures/additionalResources.html)
+
 ## HELP (Health Evaluation and Linkage to Primary Care) Dataset
 
 * [HELP Dataset in *.Rdata format](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/helpwide.RData)
