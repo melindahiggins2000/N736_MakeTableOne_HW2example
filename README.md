@@ -22,6 +22,7 @@ by Melinda Higgins, PhD; [https://melindahiggins.netlify.app/](https://melindahi
 
 ## HELP (Health Evaluation and Linkage to Primary Care) Dataset
 
+* [HELP Dataset in *.Rdata format](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/helpwide.RData)
 * [HELP Study Details and Dataset](https://nhorton.people.amherst.edu/sasr2/datasets.php)
 * [HELP Study Data Collection Forms ("codebook")](https://nhorton.people.amherst.edu/help/)
 * [SAS and R Book](https://nhorton.people.amherst.edu/sasr2/)
