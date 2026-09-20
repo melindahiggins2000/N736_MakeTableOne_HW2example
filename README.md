@@ -36,11 +36,11 @@ by Melinda Higgins, PhD; [https://melindahiggins.netlify.app/](https://melindahi
 
 ## Small Dataset, R and RMarkdown to Get Started [re: Jordan Pelkmans, Fall 2025]
 
-* [Intro to R Slides - Jordan Pelkmans](https://melindahiggins2000.github.io/emory_tidal_Rlectures/Intro_to_R_Presentation.pdf)
-* [Small Data Example - spreadsheet data CSV](https://melindahiggins2000.github.io/emory_tidal_Rlectures/example_df.csv)
-* [R code to get started](https://melindahiggins2000.github.io/emory_tidal_Rlectures/Intro_to_r_example.R)
-* [Rmarkdown to get started - RMD](https://melindahiggins2000.github.io/emory_tidal_Rlectures/example_markdown_with_gtsummary.Rmd)
-* [Rmarkdown to get started - HTML](https://melindahiggins2000.github.io/emory_tidal_Rlectures/example_markdown_with_gtsummary.html)
+* [Intro to R Slides - Jordan Pelkmans](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/Intro_to_R_Presentation.pdf)
+* [Small Data Example - spreadsheet data CSV](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/example_df.csv)
+* [R code to get started](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/Intro_to_r_example.R)
+* [Rmarkdown to get started - RMD](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/example_markdown_with_gtsummary.Rmd)
+* [Rmarkdown to get started - HTML](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/example_markdown_with_gtsummary.html)
 
 ## HELP (Health Evaluation and Linkage to Primary Care) Dataset
 
