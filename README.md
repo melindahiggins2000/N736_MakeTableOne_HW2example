@@ -14,11 +14,20 @@ by Melinda Higgins, PhD; [https://melindahiggins.netlify.app/](https://melindahi
 
 # Making Table "One" Using R and RMarkdown
 
+## Why Table "One" is Important 
+
+* [Who is in this study, anyway? Guidelines for a useful Table 1](https://www-sciencedirect-com.proxy.library.emory.edu/science/article/pii/S0895435618309867)
+* [Study reporting guidelines](https://blog.eoscu.com/blog/three-cheers-for-the-trend-to-consort-with-orion-at-the-equator-or-reporting-guidelines-for-research)
+* [Writing up your Clinical Trial Report for a scientific journal](https://bjsm.bmj.com/content/bjsports/56/12/683.full.pdf)
+* [p-values inappropriate for RCTs but common](https://journals-sagepub-com.proxy.library.emory.edu/doi/pdf/10.1177/1741826711421688)
+* [Choosing Statistical Tests and Models](https://stats.oarc.ucla.edu/other/mult-pkg/whatstat/)
+
 ## Slides
 
-* [Slides - Levels of Measurement](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/Levels_of_Measurement_clarified_MHiggins_May2020.pdf)
-* [Slides - Power and Effect Sizes](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/MHiggins_PowerLecture_11122024.pdf)
-* [Slides - P-values and Effect Sizes](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/MHiggins_pvalues_effectSizes.pdf)
+* [Levels of Measurement](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/Levels_of_Measurement_clarified_MHiggins_May2020.pdf)
+* [Power and Effect Sizes](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/MHiggins_PowerLecture_11122024.pdf)
+* [P-values and Effect Sizes](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/MHiggins_pvalues_effectSizes.pdf)
+* [Correlation Foundations](https://melindahiggins2000.github.io/N736_MakeTableOne_HW2example/MHiggins_CorrelationFoundation_08302020_fix.pdf)
 
 ## HELP (Health Evaluation and Linkage to Primary Care) Dataset
 
